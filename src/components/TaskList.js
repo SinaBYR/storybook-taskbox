@@ -1,7 +1,9 @@
 import Task from './Task';
 import PropTypes from 'prop-types';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateTaskState } from '../lib/store';
 
-export default function TaskList({ loading, tasks, onPinTask, onArchiveTask }) {
+export function PureTaskList({ loading, tasks, onPinTask, onArchiveTask }) {
   const events = {
     onPinTask,
     onArchiveTask,
@@ -55,7 +57,7 @@ export default function TaskList({ loading, tasks, onPinTask, onArchiveTask }) {
   );
 }
 
-TaskList.propTypes = {
+PureTaskList.propTypes = {
   tasks: PropTypes.arrayOf(Task.propTypes.task).isRequired,
   loading: PropTypes.bool,
   // Event to change the task to pinned
@@ -64,6 +66,29 @@ TaskList.propTypes = {
   onArchiveTask: PropTypes.func
 }
 
-TaskList.defaultProps = {
+PureTaskList.defaultProps = {
   loading: false
+}
+
+export const TaskList = () => {
+  const tasks = useSelector(state => state.tasks);
+  const dispatch = useDispatch();
+
+  const pinTask = value => {
+    // We're dispatching the Pinned event back to our store
+    dispatch(updateTaskState({ id: value, newTaskState: 'TASK_PINNED' }))
+  }
+
+  const archiveTask = value => {
+    dispatch(updateTaskState({ id: value, newTaskState: 'TASK_ARCHIVED' }))
+  }
+
+  const filteredTasks = tasks.filter(task => task.state === 'TASK_INBOX' || task.state === 'TASK_PINNED')
+
+  return (
+    <PureTaskList 
+      tasks={filteredTasks}
+      onPinTask={(id) => pinTask(id)}
+      onArchiveTask={(id) => archiveTask(id)}/>
+  )
 }
