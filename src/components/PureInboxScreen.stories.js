@@ -2,6 +2,7 @@ import { PureInboxScreen } from "./InboxScreen";
 import { Provider } from "react-redux";
 import { configureStore, createSlice } from "@reduxjs/toolkit";
 import * as TaskListStories from './TaskList.stories';
+import { fireEvent, within } from '@storybook/testing-library';
 
 // A super-simple mock of a redux store
 const MockStore = configureStore({
@@ -36,4 +37,18 @@ export const Default = Template.bind({});
 export const Error = Template.bind({});
 Error.args = {
   error: 'Some error message'
+}
+
+export const WithInteractions = Template.bind({});
+WithInteractions.play = async ({ canvasElement }) => {
+  // canvas is the element in which every story is displayed. (on the screen)
+  const canvas = within(canvasElement);
+
+  // Simulates pinning the first task
+  // click on the element which has aria-label set to pinTask-1
+  await fireEvent.click(canvas.getByLabelText('pinTask-1'));
+
+  // Simulates pinning the third task
+  // click on the element which has aria-label set to pinTask-3
+  await fireEvent.click(canvas.getByLabelText('pinTask-3'));
 }
